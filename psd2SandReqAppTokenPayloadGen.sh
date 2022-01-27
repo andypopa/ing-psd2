@@ -33,4 +33,7 @@ digest: $digest"
 signature=`printf %s "$signingString" | openssl dgst -sha256 -sign "${certPath}example_client_signing.key" -passin "pass:changeit" | openssl base64 -A` # YES
 
 # Curl request method must be in uppercase e.g "POST", "GET"
-payload=$payload digest=$digest reqDate=$reqDate signature=$signature node index.js
+#payload=$payload digest=$digest signature=$signature node index.js
+
+echo $signature
+signingString=$signingString node lib/sign
