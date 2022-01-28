@@ -2,8 +2,9 @@ import axios from 'axios';
 import { config } from './config.js';
 import https from 'https';
 import { getDigest } from './lib/digest.js';
+import { getAuthorizationHeaderValue } from './lib/authorization.js';
 
-const { payload, digest, signature } = process.env;
+const { payload } = process.env;
 
 console.log(config.baseUrl);
 console.log(config.certs.signing.data);
@@ -19,16 +20,18 @@ const instance = axios.create({
 	})
 });
 
-console.log({ payload, digest, signature, signingCert: config.certs.signing });
+instance.interceptors.request.use((axiosConfig) => {
+	console.log(axiosConfig);
+	axiosConfig.headers.Date = new Date().toUTCString();
+	axiosConfig.headers.Digest = getDigest(axiosConfig.data);
+	axiosConfig.headers.Authorization = getAuthorizationHeaderValue(axiosConfig);
+	return axiosConfig;
+}, function (error) {
+	return Promise.reject(error);
+});
 
-const headers = {
-	Authorization: `Signature keyId="SN=${config.certs.signing.serialNumber}",algorithm="rsa-sha256",headers="(request-target) date digest",signature="${signature}"`,
-	Digest: getDigest(payload),
-	Date: new Date().toUTCString()
-};
-
-instance.post(config.routes.auth, payload, { headers })
-	.then(console.log)
+instance.post(config.routes.auth, payload)
+	.then((res) => console.log(res.status))
 	.catch(console.error);
 
 console.log();
