@@ -8,9 +8,6 @@ const CLIENT_KEY_PATH = './certs/example_client_tls.key';
 
 export const config = {
     baseUrl: 'https://api.sandbox.ing.com',
-    routes: {
-        auth: '/oauth2/token'
-    },
     certs: {
         signing: {
             cert: readFileSync(SIGNING_CERT_PATH, 'utf8')?.replace(/\n/g, ''),

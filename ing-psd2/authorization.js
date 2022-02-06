@@ -7,22 +7,31 @@ const authorizationHeaderValueParamMapDefaults = {
 	headers: '(request-target) date digest',
 }
 
-const getAuthorizationHeaderValueFromParamMap = (authorizationHeaderValueParamMap) => {
-	const retVal = 'Signature ' + Object.entries(authorizationHeaderValueParamMap)
+const objectToHeaderValue = (authorizationHeaderValueParamMap) => {
+	const retVal = Object.entries(authorizationHeaderValueParamMap)
 		.map(([key, val]) => `${key}="${val}"`)
 		.join(',');
 
 	return retVal;
 }
 
-export const getAuthorizationHeaderValue = (axiosConfig) => {
+export const getAuthorizationHeaderValue = (axiosConfig, keyId) => {
 	const signature = signAxiosRequest(axiosConfig);
+
 	const authorizationHeaderValueParamMap = {
 		...authorizationHeaderValueParamMapDefaults,
 		signature
 	};
 
-	const authorizationHeaderValue = getAuthorizationHeaderValueFromParamMap(authorizationHeaderValueParamMap);
+	if (keyId) {
+		authorizationHeaderValueParamMap.keyId = keyId;
+	}
+
+	let authorizationHeaderValue = objectToHeaderValue(authorizationHeaderValueParamMap);
+
+	if (!keyId) {
+		authorizationHeaderValue = 'Signature ' + authorizationHeaderValue;
+	}
 
 	return authorizationHeaderValue;
 }
